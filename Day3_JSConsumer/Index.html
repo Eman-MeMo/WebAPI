@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="bootstrap .css">
+    <script src="Scripts/jquery-3.7.1.js"></script>
+</head>
+<body>
+    <style>
+        body{
+            display:flex;
+        }
+        form {
+            width: 60%;
+            height:50%;
+            margin: 20px;
+            margin-top: 100px;
+            margin-left: 30px;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid gray;
+            box-shadow: 15px 15px #ddd7d7;
+        }
+
+        label {
+            margin-top: 10px;
+        }
+
+        button {
+            border-radius: 5px;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            width: 20%;
+            margin-left: 10px;
+        }
+    </style>
+    <table class="table table-striped" id="employeeTable" style="width: 80%; margin-top: 20px; margin-left: 10px; ">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Age</th>
+                <th scope="col">Salary</th>
+                <th scope="col">Department ID</th>
+            </tr>
+        </thead>
+        <tbody>
+        
+        </tbody>
+    </table>
+    <form id="form">
+        <h3 style="margin-left: 35%; color:#7827c3; ">~ Employee ~</h3>
+        <div class="form-group">
+            <label>ID: </label>
+            <input type="number" class="form-control" name="id">
+        </div>
+        <div class="form-group">
+            <label>Name: </label>
+            <input type="text" class="form-control" name="name">
+        </div>
+        <div class="form-group">
+            <label>Age: </label>
+            <input type="number" class="form-control" name="age">
+        </div>
+        <div class="form-group">
+            <label>Salary: </label>
+            <input type="number" class="form-control" name="salary">
+        </div>
+        <div class="form-group">
+            <label>Depertment: </label>
+            <select class="form-control" id="Select1" name="DepartmentId">
+                <option  value=1 >CS</option>
+                <option  value=2 >IS</option>
+                <option  value=3 >DS</option>
+                <option  value=4 >IT</option>
+                <option  value=5 >AI</option>
+            </select>
+        </div>
+        <button type="button" onclick="funAdd()" class="btn btn-info" style="margin-left:0">Add</button>
+        <button type="button" value="Update" onclick="funUpdate()" class="btn btn-success">Edit</button>
+        <button type="button" value="Delete" onclick="funDelete()" class="btn btn-danger">Delete</button>
+    </form>
+    <script>
+        $(function () {
+            $.ajax({
+                url: "http://localhost:9999/api/employee",
+                method: "GET",
+                dataType: "json", // Assuming the response is in JSON format
+                success: function (data) {
+                    var table = $("#employeeTable tbody");
+
+                    $.each(data, function (index, employee) {
+                        var row = $("<tr>");
+                        row.append($("<td>").text(employee.id));
+                        row.append($("<td>").text(employee.name));
+                        row.append($("<td>").text(employee.age));
+                        row.append($("<td>").text(employee.salary));
+
+                        // Make an AJAX request to fetch department data
+                        $.ajax({
+                            url: "http://localhost:9999/api/department/" + employee.DepartmentId,
+                            method: "GET",
+                            dataType: "json",
+                            success: function (department) {
+                                row.append($("<td>").text(department.name));
+                                table.append(row);
+                            },
+                            error: function (error) {
+                                alert("Error fetching department data: " + error.status);
+                            }
+                        });
+                    });
+                },
+                error: function (error) {
+                    alert("Error: " + error.status);
+                }
+            });
+        });
+
+        function funAdd()   //Jquery
+        {
+            var obj = {
+                id: $("input[name='id']").val(),
+                name: $("input[name='name']").val(),
+                age: $("input[name='age']").val(),
+                salary: $("input[name='salary']").val(),
+                DepartmentId: $("#Select1").val(),
+            };
+            $.ajax({
+                url: "http://localhost:9999/api/employee",
+                method: "POST",
+                dataType: "Json",
+                data: obj,
+                success: function (data) {
+                    alert('Addded Successfully!');
+                    location.reload();
+
+                }, error: function (error) {
+                    alert(error.status)
+                }
+            })
+        }
+        function funUpdate()   //Jquery
+        {
+            var obj = {
+                id: $("input[name='id']").val(),
+                name: $("input[name='name']").val(),
+                age: $("input[name='age']").val(),
+                salary: $("input[name='salary']").val(),
+                DepartmentId: $("#Select1").val(),
+            };
+            $.ajax({
+                url: "http://localhost:9999/api/employee/" + $("input[name='id']").val(),   //or url: "http://localhost:9999/api/employee/" + obj.id,
+                method: "PUT",
+                dataType: "Json",
+                data: obj,
+                success: function (data) {
+                    alert('Updated Successfully!');
+                    location.reload();
+
+                }, error: function (error) {
+                    alert(error.status)
+                }
+            })
+        }
+        function funDelete()   //Jquery
+        {
+            $.ajax({
+                url: "http://localhost:9999/api/employee/" + $("input[name='id']").val(),   //or url: "http://localhost:9999/api/employee/" + obj.id,
+                method: "DELETE",
+                dataType: "",
+                success: function (data) {
+                    alert('Deleted Successfully!');
+                    location.reload();
+
+                }, error: function (error) {
+                    alert(error.status)
+                }
+            })
+        }
+    </script>
+</body>
+</html>
